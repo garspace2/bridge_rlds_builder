@@ -20,7 +20,7 @@ If you want to manually create an environment, the key packages to install are `
 `tensorflow_datasets`, `tensorflow_hub`, `matplotlib`, `plotly` and `wandb`.
 
 
-## Run Example RLDS Dataset Creation
+## RLDS Dataset Creation
 
 Before modifying the code to convert your own dataset, run the provided example dataset creation script to ensure
 everything is installed correctly. Run the following lines to create some dummy data and convert it to RLDS.
@@ -28,7 +28,7 @@ everything is installed correctly. Run the following lines to create some dummy 
 pip3 install -e .
 cd example_dataset
 python3 create_example_data.py
-tfds build
+tfds build --data_dir ./data
 ```
 
 This should create a new dataset in `~/tensorflow_datasets/example_dataset`. Please verify that the example
