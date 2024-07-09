@@ -17,6 +17,13 @@ def create_fake_episode(path):
             'state': np.asarray(np.random.rand(10), dtype=np.float32),
             'action': np.asarray(np.random.rand(10), dtype=np.float32),
             'language_instruction': 'dummy instruction',
+            'is_first': False,
+           'is_last': False,
+           'is_terminal':False,
+           'discount': 1.0,
+           'reward': 0.0,
+           'language_instruction': 'dummy instruction',
+           'language': 'put and close the door',
         })
     np.save(path, episode)
 
