@@ -28,29 +28,29 @@ def _generate_examples(paths) -> Iterator[Tuple[str, Any]]:
             else:
                 language_embedding = np.zeros(512, dtype=np.float32)
 
-            for i in range(len(example['observations'])):
-                observation = {
-                    'state': example['observations'][i]['state'].astype(np.float32),
-                }
-                for image_idx in range(4):
-                    orig_key = f'images{image_idx}'
-                    new_key = f'image_{image_idx}'
-                    if orig_key in example['observations'][i]:
-                        observation[new_key] = example['observations'][i][orig_key]
-                    else:
-                        observation[new_key] = np.zeros_like(example['observations'][i]['images0'])
+            #for i in range(len(example['observations'])):
+            observation = {
+                'state': example['state'].astype(np.float32),
+            }
+            for image_idx in range(4):
+                orig_key = f'images{image_idx}'
+                new_key = f'image_{image_idx}'
+                if orig_key in example['observations'][i]:
+                    observation[new_key] = example['observations'][orig_key]
+                else:
+                    observation[new_key] = np.zeros_like(example['observations']['images0'])
 
-                episode.append({
-                    'observation': observation,
-                    'action': example['actions'][i].astype(np.float32),
-                    'discount': 1.0,
-                    'reward': float(i == (len(example['observations']) - 1)),
-                    'is_first': i == 0,
-                    'is_last': i == (len(example['observations']) - 1),
-                    'is_terminal': i == (len(example['observations']) - 1),
-                    'language_instruction': instruction,
-                    'language_embedding': language_embedding,
-                })
+            episode.append({
+                'observation': observation,
+                'action': example['actions'][i].astype(np.float32),
+                'discount': 1.0,
+                'reward': float(k == (len(example['observations']) - 1)),
+                'is_first': k == 0,
+                'is_last': k == (len(example['observations']) - 1),
+                'is_terminal': k == (len(example['observations']) - 1),
+                'language_instruction': instruction,
+                'language_embedding': language_embedding,
+            })
 
             # create output data sample
             sample = {
@@ -97,7 +97,7 @@ class BridgeDataset(MultiThreadedDatasetBuilder):
                 'steps': tfds.features.Dataset({
                     'observation': tfds.features.FeaturesDict({
                         'image_0': tfds.features.Image(
-                            shape=(256, 256, 3),
+                            shape=(256, 256, 3), # 和图片尺寸保持一致
                             dtype=np.uint8,
                             encoding_format='jpeg',
                             doc='Main camera RGB observation.',
@@ -196,7 +196,7 @@ class BridgeDataset(MultiThreadedDatasetBuilder):
 
     def _split_paths(self):
         """Define filepaths for data splits."""
-        base_paths = ["/nfs/kun2/users/homer/datasets/bridge_data_all/numpy_256",
+        base_paths = ["/nfs/kun2/users/homer/datasets/bridge_data_all/numpy_256",  # 数据集路径，一定要修改为自己的路径，根据glob库进行匹配
                       "/nfs/kun2/users/homer/datasets/bridge_data_all/scripted_numpy_256"]
         train_filenames, val_filenames = [], []
         for path in base_paths:
