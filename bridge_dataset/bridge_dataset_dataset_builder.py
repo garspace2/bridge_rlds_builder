@@ -13,18 +13,18 @@ def _generate_examples(paths) -> Iterator[Tuple[str, Any]]:
     # the line below needs to be *inside* generate_examples so that each worker creates it's own model
     # creating one shared model outside this function would cause a deadlock
     _embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder-large/5")
-
+    episode = []
     def _parse_examples(episode_path):
         # load raw data --> this should change for your dataset
         data = np.load(episode_path, allow_pickle=True)  # this is a list of dicts in our case
 
         for k, example in enumerate(data):
             # assemble episode --> here we're assuming demos so we set reward to 1 at the end
-            episode = []
+            
 
-            instruction = example['language'][0]
+            instruction = example['language']
             if instruction:
-                language_embedding = _embed([instruction])[0].numpy()
+                language_embedding = _embed([instruction])[0].numpy() # text encoding
             else:
                 language_embedding = np.zeros(512, dtype=np.float32)
 
@@ -35,14 +35,14 @@ def _generate_examples(paths) -> Iterator[Tuple[str, Any]]:
             for image_idx in range(4):
                 orig_key = f'images{image_idx}'
                 new_key = f'image_{image_idx}'
-                if orig_key in example['observations'][i]:
-                    observation[new_key] = example['observations'][orig_key]
+                if orig_key in example['observations']:
+                    observation[new_key] = example['observations'][orig_key] # 最好传入图片路径
                 else:
-                    observation[new_key] = np.zeros_like(example['observations']['images0'])
+                    observation[new_key] = np.zeros_like(example['observations']['images0']) # 最好图片路径
 
             episode.append({
                 'observation': observation,
-                'action': example['actions'][i].astype(np.float32),
+                'action': example['actions'].astype(np.float32),
                 'discount': 1.0,
                 'reward': float(k == (len(example['observations']) - 1)),
                 'is_first': k == 0,
